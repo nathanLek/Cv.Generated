@@ -1,0 +1,440 @@
+<!-- Shared building blocks -->
+<ng-template #photoEl let-size="size" let-fs="fs">
+  @if (showPhoto()) {
+    <img [src]="d().photo"
+         [ngStyle]="{width: size+'px', height: size+'px', objectFit:'cover', borderRadius:'50% 50% 52% 48% / 50% 52% 48% 50%', display:'block', flex:'none'}" />
+  } @else {
+    <div [ngStyle]="{width: size+'px', height: size+'px', flex:'none', borderRadius:'50% 50% 52% 48% / 50% 52% 48% 50%', background: t().soft, color: t().softInk, display:'flex', alignItems:'center', justifyContent:'center', font:'500 '+fs+'px var(--font-display)'}">{{ initials() }}</div>
+  }
+</ng-template>
+
+<ng-template #sTitle let-text>
+  <div [ngStyle]="{display:'flex', alignItems:'center', gap:'12px', marginBottom:'4px'}">
+    <h3 [ngStyle]="{margin:'0', font:'500 21px var(--font-display)', color: t().heading}">{{ text }}</h3>
+    <span [ngStyle]="{flex:'none', width:'40px', height:'3px', background: t().accent, borderRadius:'2px'}"></span>
+  </div>
+</ng-template>
+
+<ng-template #cTitle let-text>
+  <div [ngStyle]="{display:'flex', alignItems:'center', gap:'12px'}">
+    <h3 [ngStyle]="{margin:'0', font:'500 19px var(--font-display)', color: t().heading}">{{ text }}</h3>
+    <span [ngStyle]="{flex:'1', height:'1px', background:'rgba(18,32,35,.16)'}"></span>
+  </div>
+</ng-template>
+
+<ng-template #railTitle let-text let-color="color">
+  <div [ngStyle]="{font:'700 12px var(--font-body)', letterSpacing:'0.08em', textTransform:'uppercase', color: color}">{{ text }}</div>
+  <span [ngStyle]="{display:'block', width:'26px', height:'2px', background: t().accent, borderRadius:'2px'}"></span>
+</ng-template>
+
+<ng-template #expItem let-e>
+  <div [ngStyle]="{display:'flex', flexDirection:'column', gap:'3px'}">
+    <div [ngStyle]="{display:'flex', justifyContent:'space-between', alignItems:'baseline', gap:'14px'}">
+      <span [ngStyle]="{font:'700 15px var(--font-body)', color: t().ink}">{{ e.role }}</span>
+      <span [ngStyle]="{font:'400 12.5px var(--font-body)', color: t().muted, whiteSpace:'nowrap'}">{{ e.period }}</span>
+    </div>
+    <div [ngStyle]="{font:'400 13.5px var(--font-body)', color: t().heading}">{{ company(e) }}</div>
+    @if (bullets(e.desc).length) {
+      <ul [ngStyle]="{margin:'5px 0 0', paddingLeft:'17px', display:'flex', flexDirection:'column', gap:'3px'}">
+        @for (b of bullets(e.desc); track b) {
+          <li [ngStyle]="{font:'400 13px/1.5 var(--font-body)', color: t().sub}">{{ b }}</li>
+        }
+      </ul>
+    }
+  </div>
+</ng-template>
+
+<ng-template #eduItem let-e>
+  <div [ngStyle]="{display:'flex', flexDirection:'column', gap:'1px'}">
+    <div [ngStyle]="{display:'flex', justifyContent:'space-between', alignItems:'baseline', gap:'14px'}">
+      <span [ngStyle]="{font:'700 14px var(--font-body)', color: t().ink}">{{ e.degree }}</span>
+      <span [ngStyle]="{font:'400 12.5px var(--font-body)', color: t().muted, whiteSpace:'nowrap'}">{{ e.period }}</span>
+    </div>
+    <div [ngStyle]="{font:'400 13px var(--font-body)', color: t().heading}">{{ e.school }}</div>
+    @if (e.details) {
+      <div [ngStyle]="{font:'400 12.5px/1.5 var(--font-body)', color: t().sub, marginTop:'1px'}">{{ e.details }}</div>
+    }
+  </div>
+</ng-template>
+
+<!-- ====================================================== LAYOUTS ====================================================== -->
+@switch (layout()) {
+
+  <!-- ============ SIDEBAR ============ -->
+  @case ('sidebar') {
+    <div [ngStyle]="{width:'794px', minHeight:'1123px', background: t().page, display:'flex', overflow:'hidden'}">
+      <aside [ngStyle]="{width:'280px', flex:'none', background: t().panel, color: t().panelInk, padding:'42px 32px', display:'flex', flexDirection:'column', gap:'30px'}">
+        <div [ngStyle]="{display:'flex', justifyContent:'center'}">
+          <ng-container *ngTemplateOutlet="photoEl; context:{size:130, fs:46}"></ng-container>
+        </div>
+        <div [ngStyle]="{display:'flex', flexDirection:'column', gap:'10px'}">
+          <ng-container *ngTemplateOutlet="railTitle; context:{$implicit:'Contact', color: t().panelLabel}"></ng-container>
+          @for (c of contact(); track c) {
+            <div [ngStyle]="{font:'400 13px/1.55 var(--font-body)', color: t().panelInk, wordBreak:'break-word'}">{{ c }}</div>
+          }
+        </div>
+        @if (d().skills.length) {
+          <div [ngStyle]="{display:'flex', flexDirection:'column', gap:'11px'}">
+            <ng-container *ngTemplateOutlet="railTitle; context:{$implicit:'Compétences', color: t().panelLabel}"></ng-container>
+            @for (s of d().skills; track s.id) {
+              <div [ngStyle]="{display:'flex', flexDirection:'column', gap:'5px'}">
+                <span [ngStyle]="{font:'400 13px var(--font-body)', color: t().panelInk}">{{ s.name }}</span>
+                <span [ngStyle]="{height:'5px', background: t().trackOnPanel, borderRadius:'999px', display:'block'}">
+                  <span [ngStyle]="{display:'block', height:'5px', width: skillWidth(s.level), background: t().fillOnPanel, borderRadius:'999px'}"></span>
+                </span>
+              </div>
+            }
+          </div>
+        }
+        @if (d().languages.length) {
+          <div [ngStyle]="{display:'flex', flexDirection:'column', gap:'10px'}">
+            <ng-container *ngTemplateOutlet="railTitle; context:{$implicit:'Langues', color: t().panelLabel}"></ng-container>
+            @for (l of d().languages; track l.id) {
+              <div [ngStyle]="{display:'flex', justifyContent:'space-between', font:'400 13px var(--font-body)'}">
+                <span>{{ l.name }}</span><span [ngStyle]="{color: t().panelLabel}">{{ l.level }}</span>
+              </div>
+            }
+          </div>
+        }
+        @if (interests().length) {
+          <div [ngStyle]="{display:'flex', flexDirection:'column', gap:'10px'}">
+            <ng-container *ngTemplateOutlet="railTitle; context:{$implicit:'Centres d’intérêt', color: t().panelLabel}"></ng-container>
+            <div [ngStyle]="{font:'400 13px/1.7 var(--font-body)'}">{{ interestsJoined() }}</div>
+          </div>
+        }
+        @if (d().links.length) {
+          <div [ngStyle]="{display:'flex', flexDirection:'column', gap:'10px'}">
+            <ng-container *ngTemplateOutlet="railTitle; context:{$implicit:'Liens', color: t().panelLabel}"></ng-container>
+            @for (l of d().links; track l.id) {
+              <div [ngStyle]="{font:'400 12.5px/1.5 var(--font-body)', color: t().panelInk, wordBreak:'break-word'}">{{ linkText(l) }}</div>
+            }
+          </div>
+        }
+      </aside>
+
+      <main [ngStyle]="{flex:'1', padding:'44px 40px', display:'flex', flexDirection:'column', gap:'24px', minWidth:'0'}">
+        <header>
+          <h2 [ngStyle]="{font:'500 40px/1.02 var(--font-display)', color: t().heading, margin:'0'}">{{ d().fullName }}</h2>
+          <div [ngStyle]="{font:'700 13.5px var(--font-body)', letterSpacing:'0.1em', textTransform:'uppercase', color: t().accent, marginTop:'8px'}">{{ d().title }}</div>
+        </header>
+        @if (d().summary) {
+          <p [ngStyle]="{font:'400 14px/1.6 var(--font-body)', color: t().sub, margin:'0'}">{{ d().summary }}</p>
+        }
+        @if (d().experiences.length) {
+          <section [ngStyle]="{display:'flex', flexDirection:'column', gap:'14px'}">
+            <ng-container *ngTemplateOutlet="sTitle; context:{$implicit:'Expérience'}"></ng-container>
+            @for (e of d().experiences; track e.id) { <ng-container *ngTemplateOutlet="expItem; context:{$implicit:e}"></ng-container> }
+          </section>
+        }
+        @if (d().education.length) {
+          <section [ngStyle]="{display:'flex', flexDirection:'column', gap:'12px'}">
+            <ng-container *ngTemplateOutlet="sTitle; context:{$implicit:'Formation'}"></ng-container>
+            @for (e of d().education; track e.id) { <ng-container *ngTemplateOutlet="eduItem; context:{$implicit:e}"></ng-container> }
+          </section>
+        }
+      </main>
+    </div>
+  }
+
+  <!-- ============ BAND ============ -->
+  @case ('band') {
+    <div [ngStyle]="{width:'794px', minHeight:'1123px', background: t().page, display:'flex', flexDirection:'column', overflow:'hidden'}">
+      <header [ngStyle]="{position:'relative', background: t().panel, color: t().panelInk, padding:'44px 50px 40px', overflow:'hidden'}">
+        <div [ngStyle]="{position:'absolute', right:'-60px', top:'-60px', width:'230px', height:'230px', background: t().panelInk, opacity:'.1', borderRadius:'46% 54% 63% 37% / 45% 38% 62% 55%'}"></div>
+        <div [ngStyle]="{position:'absolute', right:'50px', bottom:'-40px', width:'110px', height:'110px', background: t().accent, opacity:'.25', borderRadius:'58% 42% 38% 62% / 55% 60% 40% 45%'}"></div>
+        <div [ngStyle]="{position:'relative', display:'flex', alignItems:'center', gap:'26px'}">
+          <ng-container *ngTemplateOutlet="photoEl; context:{size:112, fs:40}"></ng-container>
+          <div>
+            <h2 [ngStyle]="{font:'500 44px/1 var(--font-display)', color: t().panelInk, margin:'0'}">{{ d().fullName }}</h2>
+            <div [ngStyle]="{font:'700 13.5px var(--font-body)', letterSpacing:'0.1em', textTransform:'uppercase', color: t().panelLabel, marginTop:'10px'}">{{ d().title }}</div>
+          </div>
+        </div>
+        <div [ngStyle]="{position:'relative', display:'flex', flexWrap:'wrap', gap:'6px 20px', marginTop:'20px', font:'400 13px var(--font-body)', color: t().panelSub}">
+          @for (c of contact(); track c; let i = $index) {
+            @if (i) { <span [ngStyle]="{opacity:'.5'}">·</span> }
+            <span>{{ c }}</span>
+          }
+        </div>
+      </header>
+      <div [ngStyle]="{flex:'1', display:'grid', gridTemplateColumns:'1.6fr 1fr', gap:'36px', padding:'32px 50px'}">
+        <div [ngStyle]="{display:'flex', flexDirection:'column', gap:'22px', minWidth:'0'}">
+          @if (d().summary) { <p [ngStyle]="{font:'400 14px/1.6 var(--font-body)', color: t().sub, margin:'0'}">{{ d().summary }}</p> }
+          @if (d().experiences.length) {
+            <section [ngStyle]="{display:'flex', flexDirection:'column', gap:'14px'}">
+              <ng-container *ngTemplateOutlet="sTitle; context:{$implicit:'Expérience'}"></ng-container>
+              @for (e of d().experiences; track e.id) { <ng-container *ngTemplateOutlet="expItem; context:{$implicit:e}"></ng-container> }
+            </section>
+          }
+          @if (d().education.length) {
+            <section [ngStyle]="{display:'flex', flexDirection:'column', gap:'12px'}">
+              <ng-container *ngTemplateOutlet="sTitle; context:{$implicit:'Formation'}"></ng-container>
+              @for (e of d().education; track e.id) { <ng-container *ngTemplateOutlet="eduItem; context:{$implicit:e}"></ng-container> }
+            </section>
+          }
+        </div>
+        <div [ngStyle]="{display:'flex', flexDirection:'column', gap:'22px', background: t().soft, margin:'-32px -50px -44px 0', padding:'32px 30px'}">
+          @if (d().skills.length) {
+            <section [ngStyle]="{display:'flex', flexDirection:'column', gap:'9px'}">
+              <ng-container *ngTemplateOutlet="railTitle; context:{$implicit:'Compétences', color: t().heading}"></ng-container>
+              @for (s of d().skills; track s.id) {
+                <div [ngStyle]="{display:'flex', flexDirection:'column', gap:'5px'}">
+                  <span [ngStyle]="{font:'400 13px var(--font-body)', color: t().heading}">{{ s.name }}</span>
+                  <span [ngStyle]="{height:'5px', background: t().trackOnPage, borderRadius:'999px', display:'block'}">
+                    <span [ngStyle]="{display:'block', height:'5px', width: skillWidth(s.level), background: t().fillOnPage, borderRadius:'999px'}"></span>
+                  </span>
+                </div>
+              }
+            </section>
+          }
+          @if (d().languages.length) {
+            <section [ngStyle]="{display:'flex', flexDirection:'column', gap:'9px'}">
+              <ng-container *ngTemplateOutlet="railTitle; context:{$implicit:'Langues', color: t().heading}"></ng-container>
+              @for (l of d().languages; track l.id) {
+                <div [ngStyle]="{display:'flex', justifyContent:'space-between', font:'400 13px var(--font-body)', color: t().heading}">
+                  <span>{{ l.name }}</span><span [ngStyle]="{color: t().muted}">{{ l.level }}</span>
+                </div>
+              }
+            </section>
+          }
+          @if (interests().length) {
+            <section [ngStyle]="{display:'flex', flexDirection:'column', gap:'9px'}">
+              <ng-container *ngTemplateOutlet="railTitle; context:{$implicit:'Intérêts', color: t().heading}"></ng-container>
+              <div [ngStyle]="{font:'400 13px/1.7 var(--font-body)', color: t().heading}">{{ interestsJoined() }}</div>
+            </section>
+          }
+          @if (d().links.length) {
+            <section [ngStyle]="{display:'flex', flexDirection:'column', gap:'9px'}">
+              <ng-container *ngTemplateOutlet="railTitle; context:{$implicit:'Liens', color: t().heading}"></ng-container>
+              @for (l of d().links; track l.id) {
+                <div [ngStyle]="{font:'400 12.5px/1.5 var(--font-body)', color: t().heading, wordBreak:'break-word'}">{{ linkText(l) }}</div>
+              }
+            </section>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ============ CENTERED ============ -->
+  @case ('centered') {
+    <div [ngStyle]="{position:'relative', width:'794px', minHeight:'1123px', background: t().page, overflow:'hidden', padding:'48px'}">
+      <div [ngStyle]="{position:'absolute', left:'-66px', bottom:'-66px', width:'240px', height:'240px', background: t().soft, opacity:'.55', borderRadius:'46% 54% 63% 37% / 45% 38% 62% 55%'}"></div>
+      <div [ngStyle]="{position:'relative', display:'flex', flexDirection:'column', minHeight:'1027px', gap:'0'}">
+        <header [ngStyle]="{textAlign:'center', display:'flex', flexDirection:'column', alignItems:'center', gap:'9px', paddingBottom:'22px'}">
+          @if (showPhoto()) {
+            <div [ngStyle]="{marginBottom:'6px'}"><ng-container *ngTemplateOutlet="photoEl; context:{size:96, fs:34}"></ng-container></div>
+          } @else {
+            <div [ngStyle]="{font:'400 34px var(--font-handwritten)', color: t().ink, lineHeight:'1'}">Enchanté,</div>
+          }
+          <h2 [ngStyle]="{font:'500 46px/1 var(--font-display)', color: t().heading, margin:'0'}">{{ d().fullName }}</h2>
+          <div [ngStyle]="{font:'700 13px var(--font-body)', letterSpacing:'0.14em', textTransform:'uppercase', color: t().accent}">{{ d().title }}</div>
+          <span [ngStyle]="{width:'44px', height:'3px', background: t().accent, borderRadius:'2px', marginTop:'6px'}"></span>
+          <div [ngStyle]="{display:'flex', flexWrap:'wrap', justifyContent:'center', gap:'5px 16px', marginTop:'8px', font:'400 13px var(--font-body)', color: t().heading}">
+            @for (c of contact(); track c; let i = $index) {
+              @if (i) { <span [ngStyle]="{opacity:'.4'}">·</span> }
+              <span>{{ c }}</span>
+            }
+          </div>
+        </header>
+        @if (d().summary) {
+          <p [ngStyle]="{textAlign:'center', font:'400 14px/1.65 var(--font-body)', color: t().sub, margin:'6px auto 24px', maxWidth:'560px'}">{{ d().summary }}</p>
+        }
+        @if (d().experiences.length) {
+          <section [ngStyle]="{display:'flex', flexDirection:'column', gap:'13px', marginBottom:'22px'}">
+            <ng-container *ngTemplateOutlet="cTitle; context:{$implicit:'Expérience'}"></ng-container>
+            @for (e of d().experiences; track e.id) { <ng-container *ngTemplateOutlet="expItem; context:{$implicit:e}"></ng-container> }
+          </section>
+        }
+        <div [ngStyle]="{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'28px'}">
+          @if (d().education.length) {
+            <section [ngStyle]="{display:'flex', flexDirection:'column', gap:'11px'}">
+              <ng-container *ngTemplateOutlet="cTitle; context:{$implicit:'Formation'}"></ng-container>
+              @for (e of d().education; track e.id) { <ng-container *ngTemplateOutlet="eduItem; context:{$implicit:e}"></ng-container> }
+            </section>
+          }
+          @if (d().skills.length) {
+            <section [ngStyle]="{display:'flex', flexDirection:'column', gap:'11px'}">
+              <ng-container *ngTemplateOutlet="cTitle; context:{$implicit:'Compétences'}"></ng-container>
+              <div [ngStyle]="{display:'flex', flexWrap:'wrap', gap:'7px'}">
+                @for (s of d().skills; track s.id) {
+                  <span [ngStyle]="{font:'400 12px var(--font-body)', color: t().chipInk, background: t().chip, padding:'4px 11px', borderRadius:'999px'}">{{ s.name }}</span>
+                }
+              </div>
+            </section>
+          }
+        </div>
+        <div [ngStyle]="{marginTop:'auto', paddingTop:'20px', display:'flex', justifyContent:'space-between', alignItems:'flex-end', gap:'18px'}">
+          @if (d().languages.length) {
+            <div [ngStyle]="{font:'400 13px/1.6 var(--font-body)', color: t().heading}"><strong style="font-weight:700">Langues </strong>— {{ languagesLine() }}</div>
+          } @else { <span></span> }
+          @if (interests().length) {
+            <div [ngStyle]="{font:'400 13px/1.6 var(--font-body)', color: t().heading, textAlign:'right'}"><strong style="font-weight:700">Intérêts </strong>— {{ interests().join(', ') }}</div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ============ MINIMAL ============ -->
+  @case ('minimal') {
+    <div [ngStyle]="{width:'794px', minHeight:'1123px', background: t().page, padding:'56px 64px', display:'flex', flexDirection:'column', gap:'26px'}">
+      <header [ngStyle]="{display:'flex', justifyContent:'space-between', alignItems:'flex-end', gap:'24px', paddingBottom:'20px', borderBottom:'2px solid '+t().accent}">
+        <div>
+          <h2 [ngStyle]="{font:'500 44px/1 var(--font-display)', color: t().heading, margin:'0'}">{{ d().fullName }}</h2>
+          <div [ngStyle]="{font:'400 16px var(--font-body)', color: t().accent, marginTop:'8px', letterSpacing:'0.02em'}">{{ d().title }}</div>
+        </div>
+        <div [ngStyle]="{textAlign:'right', display:'flex', flexDirection:'column', gap:'2px', font:'400 12.5px/1.55 var(--font-body)', color: t().sub}">
+          @for (c of contact(); track c) { <span>{{ c }}</span> }
+        </div>
+      </header>
+      @if (d().summary) { <p [ngStyle]="{font:'400 14px/1.65 var(--font-body)', color: t().sub, margin:'0'}">{{ d().summary }}</p> }
+
+      @if (d().experiences.length) {
+        <section [ngStyle]="{display:'flex', flexDirection:'column', gap:'11px'}">
+          <ng-container *ngTemplateOutlet="minTitle; context:{$implicit:'Expérience'}"></ng-container>
+          <div [ngStyle]="{display:'flex', flexDirection:'column', gap:'14px'}">
+            @for (e of d().experiences; track e.id) { <ng-container *ngTemplateOutlet="expItem; context:{$implicit:e}"></ng-container> }
+          </div>
+        </section>
+      }
+      @if (d().education.length) {
+        <section [ngStyle]="{display:'flex', flexDirection:'column', gap:'11px'}">
+          <ng-container *ngTemplateOutlet="minTitle; context:{$implicit:'Formation'}"></ng-container>
+          <div [ngStyle]="{display:'flex', flexDirection:'column', gap:'10px'}">
+            @for (e of d().education; track e.id) { <ng-container *ngTemplateOutlet="eduItem; context:{$implicit:e}"></ng-container> }
+          </div>
+        </section>
+      }
+      <div [ngStyle]="{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'30px'}">
+        @if (d().skills.length) {
+          <section [ngStyle]="{display:'flex', flexDirection:'column', gap:'11px'}">
+            <ng-container *ngTemplateOutlet="minTitle; context:{$implicit:'Compétences'}"></ng-container>
+            <div [ngStyle]="{display:'flex', flexDirection:'column', gap:'8px'}">
+              @for (s of d().skills; track s.id) {
+                <div [ngStyle]="{display:'flex', alignItems:'center', justifyContent:'space-between', gap:'10px'}">
+                  <span [ngStyle]="{font:'400 13px var(--font-body)', color: t().ink}">{{ s.name }}</span>
+                  <span [ngStyle]="{display:'flex', gap:'4px', flex:'none'}">
+                    @for (n of range5; track n) {
+                      <span [ngStyle]="{width:'6px', height:'6px', borderRadius:'999px', background: n <= s.level ? t().accent : 'rgba(18,32,35,.16)'}"></span>
+                    }
+                  </span>
+                </div>
+              }
+            </div>
+          </section>
+        }
+        <div [ngStyle]="{display:'flex', flexDirection:'column', gap:'22px'}">
+          @if (d().languages.length) {
+            <section [ngStyle]="{display:'flex', flexDirection:'column', gap:'11px'}">
+              <ng-container *ngTemplateOutlet="minTitle; context:{$implicit:'Langues'}"></ng-container>
+              <div [ngStyle]="{display:'flex', flexDirection:'column', gap:'5px'}">
+                @for (l of d().languages; track l.id) {
+                  <div [ngStyle]="{display:'flex', justifyContent:'space-between', font:'400 13px var(--font-body)', color: t().ink}">
+                    <span>{{ l.name }}</span><span [ngStyle]="{color: t().muted}">{{ l.level }}</span>
+                  </div>
+                }
+              </div>
+            </section>
+          }
+          @if (interests().length) {
+            <section [ngStyle]="{display:'flex', flexDirection:'column', gap:'11px'}">
+              <ng-container *ngTemplateOutlet="minTitle; context:{$implicit:'Centres d’intérêt'}"></ng-container>
+              <div [ngStyle]="{font:'400 13px/1.7 var(--font-body)', color: t().sub}">{{ interestsJoined() }}</div>
+            </section>
+          }
+        </div>
+      </div>
+      @if (d().links.length) {
+        <section [ngStyle]="{display:'flex', flexDirection:'column', gap:'11px'}">
+          <ng-container *ngTemplateOutlet="minTitle; context:{$implicit:'Liens & certifications'}"></ng-container>
+          <div [ngStyle]="{display:'flex', flexWrap:'wrap', gap:'4px 18px', font:'400 12.5px var(--font-body)', color: t().heading}">
+            @for (l of d().links; track l.id) { <span>{{ linkText(l) }}</span> }
+          </div>
+        </section>
+      }
+    </div>
+  }
+
+  <!-- ============ DUO ============ -->
+  @case ('duo') {
+    <div [ngStyle]="{width:'794px', minHeight:'1123px', background: t().page, padding:'52px 56px', display:'flex', flexDirection:'column', gap:'24px'}">
+      <header [ngStyle]="{display:'flex', justifyContent:'space-between', alignItems:'center', gap:'24px'}">
+        <div [ngStyle]="{display:'flex', alignItems:'center', gap:'18px'}">
+          @if (showPhoto()) { <ng-container *ngTemplateOutlet="photoEl; context:{size:84, fs:30}"></ng-container> }
+          <div>
+            <h2 [ngStyle]="{font:'500 42px/1 var(--font-display)', color: t().heading, margin:'0'}">{{ d().fullName }}</h2>
+            <div [ngStyle]="{font:'700 13px var(--font-body)', letterSpacing:'0.1em', textTransform:'uppercase', color: t().accent, marginTop:'8px'}">{{ d().title }}</div>
+          </div>
+        </div>
+        <div [ngStyle]="{textAlign:'right', display:'flex', flexDirection:'column', gap:'2px', font:'400 12.5px/1.55 var(--font-body)', color: t().sub}">
+          @for (c of contact(); track c) { <span>{{ c }}</span> }
+        </div>
+      </header>
+      <span [ngStyle]="{height:'3px', width:'56px', background: t().accent, borderRadius:'2px'}"></span>
+      @if (d().summary) { <p [ngStyle]="{font:'400 14px/1.65 var(--font-body)', color: t().sub, margin:'0'}">{{ d().summary }}</p> }
+      <div [ngStyle]="{display:'grid', gridTemplateColumns:'1.5fr 1fr', gap:'30px', marginTop:'4px'}">
+        <div [ngStyle]="{display:'flex', flexDirection:'column', gap:'22px', minWidth:'0'}">
+          @if (d().experiences.length) {
+            <section [ngStyle]="{display:'flex', flexDirection:'column', gap:'14px'}">
+              <ng-container *ngTemplateOutlet="sTitle; context:{$implicit:'Expérience'}"></ng-container>
+              @for (e of d().experiences; track e.id) { <ng-container *ngTemplateOutlet="expItem; context:{$implicit:e}"></ng-container> }
+            </section>
+          }
+          @if (d().education.length) {
+            <section [ngStyle]="{display:'flex', flexDirection:'column', gap:'12px'}">
+              <ng-container *ngTemplateOutlet="sTitle; context:{$implicit:'Formation'}"></ng-container>
+              @for (e of d().education; track e.id) { <ng-container *ngTemplateOutlet="eduItem; context:{$implicit:e}"></ng-container> }
+            </section>
+          }
+        </div>
+        <div [ngStyle]="{display:'flex', flexDirection:'column', gap:'22px', paddingLeft:'28px', borderLeft:'1px solid rgba(18,32,35,.12)'}">
+          @if (d().skills.length) {
+            <section [ngStyle]="{display:'flex', flexDirection:'column', gap:'9px'}">
+              <ng-container *ngTemplateOutlet="railTitle; context:{$implicit:'Compétences', color: t().heading}"></ng-container>
+              @for (s of d().skills; track s.id) {
+                <div [ngStyle]="{display:'flex', flexDirection:'column', gap:'5px'}">
+                  <span [ngStyle]="{font:'400 13px var(--font-body)', color: t().ink}">{{ s.name }}</span>
+                  <span [ngStyle]="{height:'5px', background: t().trackOnPage, borderRadius:'999px', display:'block'}">
+                    <span [ngStyle]="{display:'block', height:'5px', width: skillWidth(s.level), background: t().fillOnPage, borderRadius:'999px'}"></span>
+                  </span>
+                </div>
+              }
+            </section>
+          }
+          @if (d().languages.length) {
+            <section [ngStyle]="{display:'flex', flexDirection:'column', gap:'9px'}">
+              <ng-container *ngTemplateOutlet="railTitle; context:{$implicit:'Langues', color: t().heading}"></ng-container>
+              @for (l of d().languages; track l.id) {
+                <div [ngStyle]="{display:'flex', justifyContent:'space-between', font:'400 13px var(--font-body)', color: t().ink}">
+                  <span>{{ l.name }}</span><span [ngStyle]="{color: t().muted}">{{ l.level }}</span>
+                </div>
+              }
+            </section>
+          }
+          @if (interests().length) {
+            <section [ngStyle]="{display:'flex', flexDirection:'column', gap:'9px'}">
+              <ng-container *ngTemplateOutlet="railTitle; context:{$implicit:'Intérêts', color: t().heading}"></ng-container>
+              <div [ngStyle]="{font:'400 13px/1.7 var(--font-body)', color: t().ink}">{{ interestsJoined() }}</div>
+            </section>
+          }
+          @if (d().links.length) {
+            <section [ngStyle]="{display:'flex', flexDirection:'column', gap:'9px'}">
+              <ng-container *ngTemplateOutlet="railTitle; context:{$implicit:'Liens', color: t().heading}"></ng-container>
+              @for (l of d().links; track l.id) {
+                <div [ngStyle]="{font:'400 12.5px/1.5 var(--font-body)', color: t().heading, wordBreak:'break-word'}">{{ linkText(l) }}</div>
+              }
+            </section>
+          }
+        </div>
+      </div>
+    </div>
+  }
+}
+
+<!-- minimal-style section title (small caps + accent dot) -->
+<ng-template #minTitle let-text>
+  <div [ngStyle]="{display:'flex', alignItems:'center', gap:'9px'}">
+    <span [ngStyle]="{width:'7px', height:'7px', borderRadius:'999px', background: t().accent, flex:'none'}"></span>
+    <h3 [ngStyle]="{margin:'0', font:'700 12px var(--font-body)', letterSpacing:'0.16em', textTransform:'uppercase', color: t().heading}">{{ text }}</h3>
+  </div>
+</ng-template>

@@ -1,0 +1,93 @@
+/* =========================================================
+   Éditeur de CV — kartenmacherei (KAM) global styles
+   Tokens mirror the KAM design system (colors_and_type.css)
+   ========================================================= */
+
+@font-face {
+  font-family: 'Lato';
+  src: url('./assets/fonts/Lato-Regular.ttf') format('truetype');
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Lato';
+  src: url('./assets/fonts/Lato-Bold.ttf') format('truetype');
+  font-weight: 700; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Recoleta';
+  src: url('./assets/fonts/RecoletaAlt-Medium.otf') format('opentype');
+  font-weight: 500; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Royal Palms';
+  src: url('./assets/fonts/RoyalPalms-Regular.ttf') format('truetype');
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+
+:root {
+  /* Primary / secondary / accent */
+  --kam-forest: #004C58;
+  --kam-sky-blue: #D2DEEE;
+  --kam-linen: #F6F2EB;
+  --kam-white: #FFFFFF;
+  --kam-dark-black: #122023;
+  --kam-cherry-flower: #FFB7DB;
+  --kam-coral: #FC4309;
+
+  /* Semantic */
+  --fg-primary: var(--kam-dark-black);
+  --fg-secondary: #272A29;
+  --fg-brand: var(--kam-forest);
+  --fg-on-dark: var(--kam-linen);
+  --fg-muted: #737373;
+
+  /* Type families */
+  --font-display: 'Recoleta', 'Playfair Display', Georgia, serif;
+  --font-body: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  --font-handwritten: 'Royal Palms', 'Dancing Script', cursive;
+
+  /* Overline tracking */
+  --overline-tracking: 0.08em;
+
+  /* Shadows */
+  --shadow-card: 0 2px 8px rgba(0,0,0,0.08);
+  --shadow-card-hover: 0 6px 20px rgba(0,0,0,0.10);
+  --shadow-pop: 0 12px 32px rgba(0,0,0,0.12);
+
+  /* Motion */
+  --ease-soft: cubic-bezier(0.32, 0.72, 0.25, 1);
+  --ease-out: cubic-bezier(0.2, 0.8, 0.25, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--kam-white);
+  color: var(--fg-primary);
+  font: 400 16px/1.55 var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button { font-family: inherit; }
+input, select, textarea { font-family: var(--font-body); }
+
+::-webkit-scrollbar { width: 11px; height: 11px; }
+::-webkit-scrollbar-thumb {
+  background: rgba(0,76,88,.22); border-radius: 999px;
+  border: 3px solid transparent; background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(0,76,88,.4); border: 3px solid transparent; background-clip: padding-box; }
+
+@keyframes cvfade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* Print: only the off-screen full A4 CV is shown */
+@media print {
+  @page { size: A4; margin: 0; }
+  body * { visibility: hidden !important; }
+  #cv-print, #cv-print * { visibility: visible !important; }
+  #cv-print {
+    position: absolute !important; left: 0 !important; top: 0 !important;
+    box-shadow: none !important; margin: 0 !important;
+  }
+}

@@ -1,0 +1,215 @@
+<div class="form">
+  <!-- ============ MODELE & COULEURS ============ -->
+  <section class="sec">
+    <button class="sec-head" (click)="toggle('model')">
+      <span class="sec-title">Modèle &amp; couleurs</span>
+      <span class="chev" [class.up]="isOpen('model')"><app-icon name="chev" [size]="18"></app-icon></span>
+    </button>
+    @if (isOpen('model')) {
+      <div class="sec-body">
+        <button class="browse" (click)="store.openPicker()"><app-icon name="grid" [size]="16"></app-icon>Parcourir la galerie de modèles</button>
+
+        <div class="field">
+          <label>Mise en page</label>
+          <select [value]="cv().layout" (change)="store.setMeta({ layout: $any(val($event)) })">
+            @for (l of layouts; track l.key) { <option [value]="l.key">{{ l.label }}</option> }
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Thème de couleurs</label>
+          <div class="schemes">
+            @for (k of schemeKeys; track k) {
+              <button class="sw" [class.on]="schemeActive(k)" [title]="schemeLabels[k]" (click)="store.setScheme(k)">
+                <span class="sw-a" [style.background]="schemes[k].panel"></span>
+                <span class="sw-b" [style.background]="schemes[k].page"></span>
+                <span class="sw-c" [style.background]="schemes[k].accent"></span>
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="colors">
+          <div class="field"><label>Accent</label>
+            <div class="color"><input type="color" [value]="t().accent" (input)="store.setTheme({ accent: val($event) })"><span>{{ t().accent }}</span></div>
+          </div>
+          <div class="field"><label>Titres</label>
+            <div class="color"><input type="color" [value]="t().heading" (input)="store.setTheme({ heading: val($event) })"><span>{{ t().heading }}</span></div>
+          </div>
+          <div class="field"><label>Bloc / panneau</label>
+            <div class="color"><input type="color" [value]="t().panel" (input)="store.setPanelColor(val($event))"><span>{{ t().panel }}</span></div>
+          </div>
+          <div class="field"><label>Fond de page</label>
+            <div class="color"><input type="color" [value]="t().page" (input)="store.setTheme({ page: val($event) })"><span>{{ t().page }}</span></div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Photo</label>
+          <div class="photo-row">
+            <label class="photo-btn"><app-icon name="camera" [size]="15"></app-icon>{{ d().photo ? 'Changer' : 'Importer' }}
+              <input type="file" accept="image/*" (change)="onPhoto($event.target)" hidden>
+            </label>
+            @if (d().photo) {
+              <label class="check"><input type="checkbox" [checked]="cv().showPhoto" (change)="store.setMeta({ showPhoto: checked($event) })">Afficher sur le CV</label>
+              <button class="icon-btn danger" title="Retirer" (click)="store.setPhoto(null)"><app-icon name="trash" [size]="17"></app-icon></button>
+            } @else { <span class="hint">PNG / JPG</span> }
+          </div>
+        </div>
+      </div>
+    }
+  </section>
+
+  <!-- ============ INFORMATIONS ============ -->
+  <section class="sec">
+    <button class="sec-head" (click)="toggle('infos')"><span class="sec-title">Informations</span><span class="chev" [class.up]="isOpen('infos')"><app-icon name="chev" [size]="18"></app-icon></span></button>
+    @if (isOpen('infos')) {
+      <div class="sec-body">
+        <div class="two">
+          <div class="field"><label>Nom complet</label><input [value]="d().fullName" (input)="store.setField('fullName', val($event))"></div>
+          <div class="field"><label>Titre / poste</label><input [value]="d().title" (input)="store.setField('title', val($event))"></div>
+        </div>
+        <div class="two">
+          <div class="field"><label>Email</label><input [value]="d().email" (input)="store.setField('email', val($event))"></div>
+          <div class="field"><label>Téléphone</label><input [value]="d().phone" (input)="store.setField('phone', val($event))"></div>
+        </div>
+        <div class="two">
+          <div class="field"><label>Localisation</label><input [value]="d().location" (input)="store.setField('location', val($event))"></div>
+          <div class="field"><label>Site / lien</label><input [value]="d().website" (input)="store.setField('website', val($event))"></div>
+        </div>
+      </div>
+    }
+  </section>
+
+  <!-- ============ PROFIL ============ -->
+  <section class="sec">
+    <button class="sec-head" (click)="toggle('summary')"><span class="sec-title">Profil</span><span class="chev" [class.up]="isOpen('summary')"><app-icon name="chev" [size]="18"></app-icon></span></button>
+    @if (isOpen('summary')) {
+      <div class="sec-body">
+        <div class="field"><label>Résumé</label><textarea rows="4" [value]="d().summary" (input)="store.setField('summary', val($event))" placeholder="Quelques lignes sur ton parcours…"></textarea></div>
+      </div>
+    }
+  </section>
+
+  <!-- ============ EXPERIENCES ============ -->
+  <section class="sec">
+    <button class="sec-head" (click)="toggle('exp')"><span class="sec-title">Expériences <em>{{ d().experiences.length }}</em></span><span class="chev" [class.up]="isOpen('exp')"><app-icon name="chev" [size]="18"></app-icon></span></button>
+    @if (isOpen('exp')) {
+      <div class="sec-body">
+        @for (e of d().experiences; track e.id; let i = $index) {
+          <div class="item">
+            <div class="item-tools">
+              @if (i > 0) { <button class="icon-btn" title="Monter" (click)="store.moveItem('experiences', e.id, -1)"><app-icon name="up" [size]="17"></app-icon></button> }
+              @if (i < d().experiences.length - 1) { <button class="icon-btn" title="Descendre" (click)="store.moveItem('experiences', e.id, 1)"><app-icon name="down" [size]="17"></app-icon></button> }
+              <button class="icon-btn danger" title="Supprimer" (click)="store.removeItem('experiences', e.id)"><app-icon name="trash" [size]="17"></app-icon></button>
+            </div>
+            <div class="field"><label>Poste</label><input [value]="e.role" (input)="store.updateExperience(e.id, { role: val($event) })"></div>
+            <div class="two">
+              <div class="field"><label>Entreprise</label><input [value]="e.company" (input)="store.updateExperience(e.id, { company: val($event) })"></div>
+              <div class="field"><label>Lieu</label><input [value]="e.location" (input)="store.updateExperience(e.id, { location: val($event) })"></div>
+            </div>
+            <div class="field"><label>Période</label><input [value]="e.period" (input)="store.updateExperience(e.id, { period: val($event) })"></div>
+            <div class="field"><label>Description (une ligne = une puce)</label><textarea rows="3" [value]="e.desc" (input)="store.updateExperience(e.id, { desc: val($event) })"></textarea></div>
+          </div>
+        }
+        <button class="add" (click)="store.addExperience()"><app-icon name="plus" [size]="16"></app-icon>Ajouter une expérience</button>
+      </div>
+    }
+  </section>
+
+  <!-- ============ FORMATION ============ -->
+  <section class="sec">
+    <button class="sec-head" (click)="toggle('edu')"><span class="sec-title">Formation <em>{{ d().education.length }}</em></span><span class="chev" [class.up]="isOpen('edu')"><app-icon name="chev" [size]="18"></app-icon></span></button>
+    @if (isOpen('edu')) {
+      <div class="sec-body">
+        @for (e of d().education; track e.id; let i = $index) {
+          <div class="item">
+            <div class="item-tools">
+              @if (i > 0) { <button class="icon-btn" title="Monter" (click)="store.moveItem('education', e.id, -1)"><app-icon name="up" [size]="17"></app-icon></button> }
+              @if (i < d().education.length - 1) { <button class="icon-btn" title="Descendre" (click)="store.moveItem('education', e.id, 1)"><app-icon name="down" [size]="17"></app-icon></button> }
+              <button class="icon-btn danger" title="Supprimer" (click)="store.removeItem('education', e.id)"><app-icon name="trash" [size]="17"></app-icon></button>
+            </div>
+            <div class="field"><label>Diplôme</label><input [value]="e.degree" (input)="store.updateEducation(e.id, { degree: val($event) })"></div>
+            <div class="two">
+              <div class="field"><label>École</label><input [value]="e.school" (input)="store.updateEducation(e.id, { school: val($event) })"></div>
+              <div class="field"><label>Période</label><input [value]="e.period" (input)="store.updateEducation(e.id, { period: val($event) })"></div>
+            </div>
+            <div class="field"><label>Détails (optionnel)</label><input [value]="e.details" (input)="store.updateEducation(e.id, { details: val($event) })"></div>
+          </div>
+        }
+        <button class="add" (click)="store.addEducation()"><app-icon name="plus" [size]="16"></app-icon>Ajouter une formation</button>
+      </div>
+    }
+  </section>
+
+  <!-- ============ COMPETENCES ============ -->
+  <section class="sec">
+    <button class="sec-head" (click)="toggle('skills')"><span class="sec-title">Compétences <em>{{ d().skills.length }}</em></span><span class="chev" [class.up]="isOpen('skills')"><app-icon name="chev" [size]="18"></app-icon></span></button>
+    @if (isOpen('skills')) {
+      <div class="sec-body">
+        @for (s of d().skills; track s.id) {
+          <div class="skill-row">
+            <input class="grow" [value]="s.name" (input)="store.updateSkill(s.id, { name: val($event) })">
+            <span class="dots">
+              @for (n of levels; track n) {
+                <button class="dot" [class.fill]="n <= s.level" [title]="n + '/5'" (click)="store.updateSkill(s.id, { level: n })"></button>
+              }
+            </span>
+            <button class="icon-btn danger" title="Supprimer" (click)="store.removeItem('skills', s.id)"><app-icon name="trash" [size]="17"></app-icon></button>
+          </div>
+        }
+        <button class="add" (click)="store.addSkill()"><app-icon name="plus" [size]="16"></app-icon>Ajouter une compétence</button>
+      </div>
+    }
+  </section>
+
+  <!-- ============ LANGUES ============ -->
+  <section class="sec">
+    <button class="sec-head" (click)="toggle('lang')"><span class="sec-title">Langues <em>{{ d().languages.length }}</em></span><span class="chev" [class.up]="isOpen('lang')"><app-icon name="chev" [size]="18"></app-icon></span></button>
+    @if (isOpen('lang')) {
+      <div class="sec-body">
+        @for (l of d().languages; track l.id) {
+          <div class="skill-row">
+            <input class="grow" [value]="l.name" (input)="store.updateLanguage(l.id, { name: val($event) })">
+            <select [value]="l.level" (change)="store.updateLanguage(l.id, { level: val($event) })">
+              @for (lv of langLevels; track lv) { <option [value]="lv">{{ lv }}</option> }
+            </select>
+            <button class="icon-btn danger" title="Supprimer" (click)="store.removeItem('languages', l.id)"><app-icon name="trash" [size]="17"></app-icon></button>
+          </div>
+        }
+        <button class="add" (click)="store.addLanguage()"><app-icon name="plus" [size]="16"></app-icon>Ajouter une langue</button>
+      </div>
+    }
+  </section>
+
+  <!-- ============ INTERETS ============ -->
+  <section class="sec">
+    <button class="sec-head" (click)="toggle('interests')"><span class="sec-title">Centres d'intérêt</span><span class="chev" [class.up]="isOpen('interests')"><app-icon name="chev" [size]="18"></app-icon></span></button>
+    @if (isOpen('interests')) {
+      <div class="sec-body">
+        <div class="field"><label>Séparés par des virgules</label><textarea rows="2" [value]="d().interests" (input)="store.setField('interests', val($event))" placeholder="Open source, Échecs…"></textarea></div>
+      </div>
+    }
+  </section>
+
+  <!-- ============ LIENS ============ -->
+  <section class="sec">
+    <button class="sec-head" (click)="toggle('links')"><span class="sec-title">Liens &amp; certifications <em>{{ d().links.length }}</em></span><span class="chev" [class.up]="isOpen('links')"><app-icon name="chev" [size]="18"></app-icon></span></button>
+    @if (isOpen('links')) {
+      <div class="sec-body">
+        @for (l of d().links; track l.id; let i = $index) {
+          <div class="item">
+            <div class="item-tools">
+              @if (i > 0) { <button class="icon-btn" title="Monter" (click)="store.moveItem('links', l.id, -1)"><app-icon name="up" [size]="17"></app-icon></button> }
+              @if (i < d().links.length - 1) { <button class="icon-btn" title="Descendre" (click)="store.moveItem('links', l.id, 1)"><app-icon name="down" [size]="17"></app-icon></button> }
+              <button class="icon-btn danger" title="Supprimer" (click)="store.removeItem('links', l.id)"><app-icon name="trash" [size]="17"></app-icon></button>
+            </div>
+            <div class="field"><label>Intitulé</label><input [value]="l.label" (input)="store.updateLink(l.id, { label: val($event) })"></div>
+            <div class="field"><label>URL (optionnel)</label><input [value]="l.url" (input)="store.updateLink(l.id, { url: val($event) })"></div>
+          </div>
+        }
+        <button class="add" (click)="store.addLink()"><app-icon name="plus" [size]="16"></app-icon>Ajouter un lien</button>
+      </div>
+    }
+  </section>
+</div>
